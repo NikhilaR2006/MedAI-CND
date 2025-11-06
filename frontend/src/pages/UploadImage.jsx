@@ -53,7 +53,7 @@ const UploadImage = () => {
     ? process.env.REACT_APP_API_URL.trim()
     : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
       ? 'http://localhost:5000'
-      : '';
+      : 'https://medai-cnd-backend.onrender.com/';
 
   // Auto-fill referring doctor from user profile
   useEffect(() => {

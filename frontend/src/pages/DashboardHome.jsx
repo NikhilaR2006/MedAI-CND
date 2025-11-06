@@ -19,11 +19,13 @@ const DashboardHome = () => {
   const [recentActivity, setRecentActivity] = useState([]);
 
   // Resolve API base URL
-  const apiBase = (process.env.REACT_APP_API_URL && process.env.REACT_APP_API_URL.trim())
+  const apiBase =
+  (process.env.REACT_APP_API_URL && process.env.REACT_APP_API_URL.trim())
     ? process.env.REACT_APP_API_URL.trim()
     : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
       ? 'http://localhost:5000'
-      : '';
+      : 'https://medai-cnd-backend.onrender.com';
+
 
   // Fetch counts for dashboard stats
   const fetchCategoryCounts = async () => {

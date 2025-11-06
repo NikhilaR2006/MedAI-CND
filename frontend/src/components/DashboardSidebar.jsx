@@ -23,11 +23,12 @@ const DashboardSidebar = () => {
   const [profile, setProfile] = useState(null);
   const { logout } = useAuth();
   // Resolve API base URL
-  const apiBase = (process.env.REACT_APP_API_URL && process.env.REACT_APP_API_URL.trim())
+  const apiBase =
+  (process.env.REACT_APP_API_URL && process.env.REACT_APP_API_URL.trim())
     ? process.env.REACT_APP_API_URL.trim()
     : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
       ? 'http://localhost:5000'
-      : '';
+      : 'https://medai-cnd-backend.onrender.com';
 
   useEffect(() => {
     const fetchProfile = async () => {
