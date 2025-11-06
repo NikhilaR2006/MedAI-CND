@@ -7,16 +7,27 @@ import { useAuth } from "../context/AuthContext";
 import { cn } from "../utils/cn";
 import LogoSpinner from "../components/LogoSpinner";
 import RouteLoadingOverlay from "../components/RouteLoadingOverlay";
-import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogHeader, DialogFooter, DialogClose } from "../components/ui/dialog";
-import { 
-  AlertDialog, 
-  AlertDialogAction, 
-  AlertDialogContent, 
-  AlertDialogDescription, 
-  AlertDialogFooter, 
-  AlertDialogHeader, 
-  AlertDialogTitle 
+import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogHeader, DialogFooter } from "../components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "../components/ui/alert-dialog";
+
+// ✅ Automatically handles local & Render environments
+const NODE_BASE =
+  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:5000"
+    : "https://medai-cnd-backend.onrender.com";
+
+const FLASK_BASE =
+  window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? "http://localhost:5001"
+    : "http://localhost:5001"; // Update if Flask backend is deployed
 
 const UploadImage = () => {
   const [isDragging, setIsDragging] = useState(false);
@@ -26,64 +37,52 @@ const UploadImage = () => {
   const [showResultDialog, setShowResultDialog] = useState(false);
   const [showNotModalityAlert, setShowNotModalityAlert] = useState(false);
   const [showPatientDetailsAlert, setShowPatientDetailsAlert] = useState(false);
-  
-  // Patient Information State
+
   const [patientInfo, setPatientInfo] = useState({
-    name: '',
-    age: '',
-    gender: '',
-    patientId: '',
-    contactNumber: '',
-    email: '',
-    symptoms: '',
-    medicalHistory: '',
-    referringDoctor: '',
-    doctorId: ''
+    name: "",
+    age: "",
+    gender: "",
+    patientId: "",
+    contactNumber: "",
+    email: "",
+    symptoms: "",
+    medicalHistory: "",
+    referringDoctor: "",
+    doctorId: "",
   });
-  
+
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // Flask backend runs on port 5001
-  const flaskBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:5001'
-    : 'http://localhost:5001'; // Update if deployed elsewhere
-  // Node backend for history (port 5000)
-  const nodeBase = (process.env.REACT_APP_API_URL && process.env.REACT_APP_API_URL.trim())
-    ? process.env.REACT_APP_API_URL.trim()
-    : (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-      ? 'http://localhost:5000'
-      : 'https://medai-cnd-backend.onrender.com/';
-
-  // Auto-fill referring doctor from user profile
+  // ✅ Auto-fill referring doctor from user profile
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await fetch(`${nodeBase}/api/profile`, {
-          credentials: 'include',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
+        const response = await fetch(`${NODE_BASE}/api/profile`, {
+          credentials: "include", // send cookies
         });
-        
+
         if (response.ok) {
           const profileData = await response.json();
-          // Auto-fill referring doctor with user's full name and doctor ID
+          console.log("Fetched user profile:", profileData);
+
           if (profileData.full_name) {
-            setPatientInfo(prev => ({
+            setPatientInfo((prev) => ({
               ...prev,
               referringDoctor: profileData.full_name,
-              doctorId: profileData.doctor_id || ''
+              doctorId: profileData.doctor_id || "",
             }));
           }
+        } else {
+          console.warn("Profile fetch failed:", response.status);
         }
       } catch (error) {
-        console.error('Failed to fetch user profile:', error);
+        console.error("Failed to fetch user profile:", error);
       }
     };
 
     fetchUserProfile();
-  }, [nodeBase]);
+  }, []);
 
   const handleDragOver = (e) => {
     e.preventDefault();
