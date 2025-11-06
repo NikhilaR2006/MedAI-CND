@@ -27,7 +27,7 @@ const nodeBase =
 const flaskBase =
   window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? "http://localhost:5001"
-    : "http://localhost:5001"; // Update if Flask backend is deployed
+    : "https://nikhilar2006-cnd-models-backend.hf.space"; // Update if Flask backend is deployed
 
 const UploadImage = () => {
   const [isDragging, setIsDragging] = useState(false);
