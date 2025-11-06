@@ -9,6 +9,9 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "../hooks/use-toast";
 import LogoSpinner from "../components/LogoSpinner";
 
+
+const API_BASE = "https://medai-cnd-backend.onrender.com";
+
 const Profile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -27,7 +30,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch("/api/profile", { credentials: "include" });
+        const res = await fetch(`${API_BASE}/api/profile`, { credentials: "include" });
         if (res.status === 401) {
           navigate("/login");
           return;
@@ -94,7 +97,7 @@ const Profile = () => {
         const base64String = reader.result;
 
         // Update profile picture on backend
-        const res = await fetch("/api/profile", {
+        const res = await fetch(`${API_BASE}/api/profile`, {
           method: "PUT",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
