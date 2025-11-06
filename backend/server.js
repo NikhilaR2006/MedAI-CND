@@ -358,25 +358,42 @@ app.get('/api/analysis/category-counts', async (req, res) => {
 // Save a completed analysis to history. Expects a completed result and base64 image data.
 app.post('/api/analysis/upload', async (req, res) => {
   try {
+    console.log("🧩 /api/analysis/upload called");
+
     let userId;
     if (USE_JWT) {
       const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
-      if (!token) return res.status(401).json({ message: 'Not authenticated' });
+      if (!token) {
+        console.warn("No token found");
+        return res.status(401).json({ message: 'Not authenticated' });
+      }
       const payload = jwt.verify(token, JWT_SECRET);
       userId = payload.id;
+      console.log("✅ Authenticated via JWT:", userId);
     } else {
       const email = req.cookies.user_email || req.headers['x-user-email'];
-      if (!email) return res.status(401).json({ message: 'Not authenticated' });
+      if (!email) {
+        console.warn("No email cookie found");
+        return res.status(401).json({ message: 'Not authenticated' });
+      }
       const user = await User.findOne({ email });
-      if (!user) return res.status(401).json({ message: 'Not authenticated' });
+      if (!user) {
+        console.warn("User not found for email:", email);
+        return res.status(401).json({ message: 'Not authenticated' });
+      }
       userId = user._id;
+      console.log("✅ Authenticated via cookie:", userId);
     }
 
     const { fileName, fileData, fileType, fileSize, imageType, results, patientInfo } = req.body;
+    console.log("📥 Received upload:", { fileName, imageType, diagnosis: results?.diagnosis });
 
     if (!results || !results.diagnosis) {
-      console.warn("⚠️ Missing results.diagnosis in upload request");
-      return res.status(200).json({ message: "Analysis received but no diagnosis provided", saved: false });
+      console.warn("⚠️ Missing results.diagnosis");
+      return res.status(200).json({
+        message: "Received upload but no diagnosis provided",
+        saved: false
+      });
     }
 
     const AnalysisModel = mongoose.connection.model('Analysis') || Analysis;
@@ -385,7 +402,7 @@ app.post('/api/analysis/upload', async (req, res) => {
       userId,
       fileName: fileName || `upload_${Date.now()}`,
       originalName: fileName || `upload_${Date.now()}`,
-      fileType: fileType || 'image',
+      fileType: fileType || 'file',
       fileSize: fileSize || 0,
       status: 'completed',
       results: {
@@ -402,8 +419,9 @@ app.post('/api/analysis/upload', async (req, res) => {
     });
 
     const saved = await analysis.save();
-    console.log(`✅ Analysis saved successfully for user ${userId}:`, saved._id);
+    console.log("✅ Analysis saved:", saved._id);
 
+    // Always return valid JSON
     return res.status(200).json({
       message: "Analysis saved successfully",
       analysisId: saved._id,
@@ -412,11 +430,14 @@ app.post('/api/analysis/upload', async (req, res) => {
     });
 
   } catch (err) {
-    console.error('Upload save error:', err);
-    return res.status(500).json({ message: 'Server error', error: err.message, saved: false });
+    console.error('❌ Upload save error:', err);
+    return res.status(500).json({
+      message: 'Server error while saving analysis',
+      error: err.message,
+      saved: false
+    });
   }
 });
-
 
 
 app.get('/', (req, res) => {
