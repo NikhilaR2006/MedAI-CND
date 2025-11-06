@@ -58,7 +58,7 @@ const UploadImage = () => {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await fetch(`${NODE_BASE}/api/profile`, {
+        const response = await fetch(`${nodeBase}/api/profile`, {
           credentials: "include", // send cookies
         });
 
