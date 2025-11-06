@@ -358,7 +358,6 @@ app.get('/api/analysis/category-counts', async (req, res) => {
 // Save a completed analysis to history. Expects a completed result and base64 image data.
 app.post('/api/analysis/upload', async (req, res) => {
   try {
-    // ✅ Auth
     let userId;
     if (USE_JWT) {
       const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
@@ -375,13 +374,11 @@ app.post('/api/analysis/upload', async (req, res) => {
 
     const { fileName, fileData, fileType, fileSize, imageType, results, patientInfo } = req.body;
 
-    // 🩹 Always send JSON even if data is incomplete
     if (!results || !results.diagnosis) {
       console.warn("⚠️ Missing results.diagnosis in upload request");
-      return res.status(200).json({ message: "Analysis received but no diagnosis provided" });
+      return res.status(200).json({ message: "Analysis received but no diagnosis provided", saved: false });
     }
 
-    // ✅ Ensure we use the same mongoose connection
     const AnalysisModel = mongoose.connection.model('Analysis') || Analysis;
 
     const analysis = new AnalysisModel({
@@ -405,20 +402,21 @@ app.post('/api/analysis/upload', async (req, res) => {
     });
 
     const saved = await analysis.save();
-    console.log(`✅ Analysis saved for user ${userId}:`, saved._id);
+    console.log(`✅ Analysis saved successfully for user ${userId}:`, saved._id);
 
-    // ✅ Always send back proper JSON
     return res.status(200).json({
       message: "Analysis saved successfully",
       analysisId: saved._id,
       diagnosis: saved.results.diagnosis,
+      saved: true
     });
 
   } catch (err) {
     console.error('Upload save error:', err);
-    return res.status(500).json({ message: 'Server error', error: err.message });
+    return res.status(500).json({ message: 'Server error', error: err.message, saved: false });
   }
 });
+
 
 
 app.get('/', (req, res) => {
