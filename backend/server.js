@@ -382,5 +382,9 @@ app.post('/api/analysis/upload', async (req, res) => {
   }
 });
 
+app.get('/', (req, res) => {
+  res.send('Backend is up and running 🚀');
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Auth server listening on ${PORT}`));
