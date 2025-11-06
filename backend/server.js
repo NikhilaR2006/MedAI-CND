@@ -61,12 +61,22 @@ app.post('/api/auth/register', async (req, res) => {
 
     if (USE_JWT) {
       const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
-      res.cookie('token', token, { httpOnly: true, sameSite: 'lax' });
+      res.cookie('token', token, {
+        httpOnly: true,
+        sameSite: 'none',  // allow cross-site cookies
+        secure: true       // required for HTTPS (Render uses HTTPS)
+      });
+
       return res.json({ token, user: { id: user._id, email: user.email, fullName: user.fullName } });
     }
 
     // If not using JWT, set a readable cookie with the user email to identify the session
-    res.cookie('user_email', user.email, { httpOnly: false, sameSite: 'lax' });
+    res.cookie('user_email', user.email, {
+      httpOnly: false,   // keep this false only if frontend needs to read it directly
+      sameSite: 'none',  // allow cross-site cookie
+      secure: true        // required for HTTPS (Render uses HTTPS)
+    });
+
     return res.json({ user: { id: user._id, email: user.email, fullName: user.fullName } });
   } catch (err) {
     console.error(err);
@@ -93,11 +103,21 @@ app.post('/api/auth/login', async (req, res) => {
 
     if (USE_JWT) {
       const token = jwt.sign({ id: user._id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
-      res.cookie('token', token, { httpOnly: true, sameSite: 'lax' });
+      res.cookie('token', token, {
+        httpOnly: true,
+        sameSite: 'none',  // allow cross-site cookies
+        secure: true       // required for HTTPS (Render uses HTTPS)
+      });
+
       return res.json({ token, user: { id: user._id, email: user.email, fullName: user.fullName } });
     }
 
-    res.cookie('user_email', user.email, { httpOnly: false, sameSite: 'lax' });
+    res.cookie('user_email', user.email, {
+      httpOnly: false,   // keep this false only if frontend needs to read it directly
+      sameSite: 'none',  // allow cross-site cookie
+      secure: true        // required for HTTPS (Render uses HTTPS)
+    });
+
     return res.json({ user: { id: user._id, email: user.email, fullName: user.fullName } });
   } catch (err) {
     console.error(err);
