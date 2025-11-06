@@ -19,12 +19,12 @@ import {
 } from "../components/ui/alert-dialog";
 
 // ✅ Automatically handles local & Render environments
-const NODE_BASE =
+const nodeBase =
   window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? "http://localhost:5000"
     : "https://medai-cnd-backend.onrender.com";
 
-const FLASK_BASE =
+const flaskBase =
   window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? "http://localhost:5001"
     : "http://localhost:5001"; // Update if Flask backend is deployed
